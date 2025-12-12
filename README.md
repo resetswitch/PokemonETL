@@ -17,7 +17,7 @@ Key goals:
 
 ## Architecture Diagram  
      
-
+```
 ---------------          -----------------
 | pokeapi.co  |          |   poke-etl    |
 | (REST JSON) |◀------▶ |   (Python)    |
@@ -36,6 +36,7 @@ Key goals:
                          |  poke-jupyter |
                          |  (Jupyter)    |
                          -----------------
+```
 The Docker compose file also defines a poke-db service (PostgreSQL) and a poke-jupyter service (JupyterLab) that mounts the source code for interactive exploration.PrerequisitesToolMinimum versionWhyDocker Engine20.10+Runs the DB & ETL containersDocker Composev2.xOrchestrates multi‑service stackPython3.11 (only needed for local dev)Runs the scripts outside DockerGitanyClone the repoMake (optional)anyHandy shortcuts (see Makefile if you add one)
 
 Note: All third‑party Python packages are listed in `requirements.txt`. They are installed automatically in the Docker image.
@@ -46,6 +47,9 @@ Note: All third‑party Python packages are listed in `requirements.txt`. They a
 | Docker Engine  | 20.10+                           | Runs the DB & ETL containers     | 
 | Docker Compose | v2.x                             | Orchestrates multi‑service stack |
 | Python         | 3.11 (only needed for local dev) | Runs the scripts outside Docker  |
+
+Tested and developed with Linux Mint 22.1
+Tested and working in Windows 11 (small bug with rich.progress output stream)
 
 # Configuration (.env)
 a `.env` file is already available, The most important variable is:
@@ -65,9 +69,8 @@ after `poke-etl` service completes the `poke-jupyter` service will go live
 and allowing access to `dql.ipynb` (available via (http://127.0.0.1:8899/lab/tree/app/scripts/dql.ipynb)[http://127.0.0.1:8899/lab/tree/app/scripts/dql.ipynb])
 There you can query the database. Shift + Enter to execute the cells.
 
-after you are done with everything. CTRL+C to close (if using linux)
+after you are done with everything. `CTRL`+`C` to close (if using linux)
 ```sh
-# Build & start the stack
 docker compose down
 ```
 
