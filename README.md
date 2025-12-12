@@ -68,7 +68,7 @@ PROJECT_DIR_PATH_LOCAL=/Desired/Path/Here
 
 after `poke-etl` service completes the `poke-jupyter` service will go live
 and allowing access to `dql.ipynb` (http://127.0.0.1:8899/lab/tree/app/scripts/dql.ipynb)
-There you can query the database. Shift + Enter to execute the cells.
+There you can query the database. `Shift` + `Enter` to execute the cells.
 
 after you are done with everything. `CTRL`+`C` to close (if using linux)
 ```sh
