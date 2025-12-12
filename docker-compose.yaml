@@ -1,0 +1,83 @@
+# Refer to project dir ./README.md for more information
+---
+services:
+
+  poke-db:
+    image: postgres:15-alpine
+    container_name: poke_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT}:5432"        # expose to host
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+    volumes:
+      - "${POSTGRES_PATH_CONFIG_LOCAL}:/var/lib/postgresql/data"
+    restart: unless-stopped # Running to interact with Power BI, Jupyter Notebook to inspect
+
+  poke-etl:
+    ulimits:
+      nofile: # max number of open file descriptors
+        soft: 4096
+        hard: 8192
+    build:
+      context: .                     # reuse the same Dockerfile
+      dockerfile: poke-etl.Dockerfile
+    container_name: poke_etl
+    tty: true          # allocate a TTY (helpful for rich.progress)
+    stdin_open: true   # (optional) keep STDIN open
+    environment:
+      # Example: you can tweak logging level without rebuilding
+      LOG_LEVEL: DEBUG
+      POSTGRES_HOST: poke-db # <-- use the service name here, should override issues with host for python
+    volumes:
+      # Mount a host folder so you can see the output after the container stops.
+      - ./app/logs:/app/logs
+    depends_on:
+      poke-db:
+        condition: service_healthy
+    # Optional: limit resources (helpful on dev machines)
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+    # Restart policy – for a one‑shot ETL you probably want “no” restart.
+    restart: "no"
+
+  poke-jupyter:
+    build:
+      context: .                     # reuse the same Dockerfile
+      dockerfile: poke-jupyter.Dockerfile
+    container_name: poke_jupyter
+    tty: true
+    stdin_open: true
+    # Keep the container alive even if no notebook is open
+#    command: >
+#      sh -c "
+#        # start Jupyter Lab in the background
+#        jupyter lab --ip=0.0.0.0 --no-browser --allow-root --NotebookApp.token='' &
+#        # keep the container running (prevents it from exiting if Jupyter dies)
+#        tail -f /dev/null
+#      "
+    environment:
+      LOG_LEVEL: DEBUG
+      POSTGRES_HOST: poke-db
+      PYTHONPATH: /app
+      # optional – set a password instead of a token
+      # JUPYTER_PASSWORD: your_secret
+    ports:
+      - "8899:8888"   # <‑‑ host 8899 → container 8888. host ↔ Jupyter Lab UI
+    volumes:
+      - ./app:/app                # mount your source code (same as poke-etl)
+      - ./app/logs:/app/logs
+    depends_on:
+      poke-db:
+        condition: service_healthy
+    restart: unless-stopped        # keep it alive across r
+
