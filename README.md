@@ -1,6 +1,6 @@
 ## Project Overview  
 
-The **PokémonETL** pipeline extracts data from the free public API[`pokeapi.co`](https://pokeapi.co/), normalises it, and stores it in a relational PostgreSQL database.  
+The **PokémonETL** pipeline extracts data from the free public API[`pokeapi.co`](https://pokeapi.co/), normalizes it, and stores it in a relational PostgreSQL database.  
 
 Key goals:
 
@@ -62,11 +62,12 @@ PROJECT_DIR_PATH_LOCAL=/Desired/Path/Here
 
 ```sh
 # Build & start the stack
-docker compose up
+/PokemonETL$ docker compose build
+/PokemonETL$ docker compose up
 ```
 
 after `poke-etl` service completes the `poke-jupyter` service will go live
-and allowing access to `dql.ipynb` (available via (http://127.0.0.1:8899/lab/tree/app/scripts/dql.ipynb)[http://127.0.0.1:8899/lab/tree/app/scripts/dql.ipynb])
+and allowing access to `dql.ipynb` (http://127.0.0.1:8899/lab/tree/app/scripts/dql.ipynb)
 There you can query the database. Shift + Enter to execute the cells.
 
 after you are done with everything. `CTRL`+`C` to close (if using linux)
