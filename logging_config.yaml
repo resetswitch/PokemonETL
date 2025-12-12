@@ -1,32 +1,25 @@
-# logging.yaml
 # --------------------------------------------------------------
-# Central logging configuration for a Python app that talks to an API.
+# Central logging configuration for a Python app
 # --------------------------------------------------------------
 
 version: 1
 disable_existing_loggers: false
 
 formatters:
-  # Human‑readable, single‑line format
+  # NOTE: Single line, but maybe change to JSON in future..
   standard:
     format: "%(asctime)s | %(levelname)-8s | %(funcName)s | %(module)s:%(lineno)d | %(message)s"
     datefmt: "%Y-%m-%d %H:%M:%S"
 
-  # Optional JSON formatter – handy for ELK, Datadog, Loki, etc.
-  json:
-    format: >-
-      {"ts":"%(asctime)s","lvl":"%(levelname)s","logger":"%(name)s","msg":%(message)s}
-    datefmt: "%Y-%m-%dT%H:%M:%S%z"
-
 handlers:
-  # Console output – INFO and above go to stdout
+  # NOTE: Console output.
   console:
     class: logging.StreamHandler
     level: WARNING
     formatter: standard
     stream: ext://sys.stdout
 
-  # Rotating file handler – daily rotation, keep two weeks of logs
+  # NOTE: Rotating file handler. Daily rotation. keep 2 weeks of logs.
   file:
     class: logging.handlers.TimedRotatingFileHandler
     level: DEBUG
@@ -37,7 +30,7 @@ handlers:
     encoding: utf-8
 
 loggers:
-
+  # NOTE: Your application namespace – name to matc package
   initialize_db:
     level: INFO
     handlers: [console, file]
@@ -46,18 +39,14 @@ loggers:
       level: INFO
       handlers: [console, file]
       propagate: false
-  async_poke_api_etl:
+  poke_api_etl:
       level: INFO
       handlers: [console, file]
       propagate: false
-  async_main:
-      level: INFO
-      handlers: [console, file]
-      propagate: false
-  # Keep third‑party libraries quiet unless something serious happens
-  urllib3:
-    level: WARNING
-    handlers: []                # inherit root handlers only
+# NOTE: 3rd parties.. (optional)
+#  duckdb:
+#    level: WARNING
+#    handlers: [] # inherit root handlers only
 
 root:
   level: WARNING

@@ -6,6 +6,7 @@ services:
     image: postgres:15-alpine
     container_name: poke_db
     environment:
+      PROJECT_DIR_PATH: ${PROJECT_DIR_PATH_LOCAL}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
@@ -25,19 +26,23 @@ services:
       nofile: # max number of open file descriptors
         soft: 4096
         hard: 8192
+
     build:
       context: .                     # reuse the same Dockerfile
-      dockerfile: poke-etl.Dockerfile
+      dockerfile: Dockerfile.poke-etl
+      args:
+        PROJECT_NAME: ${PROJECT_NAME}
     container_name: poke_etl
     tty: true          # allocate a TTY (helpful for rich.progress)
     stdin_open: true   # (optional) keep STDIN open
     environment:
       # Example: you can tweak logging level without rebuilding
+      PROJECT_DIR_PATH: ${PROJECT_DIR_PATH_DOCKER}
       LOG_LEVEL: DEBUG
       POSTGRES_HOST: poke-db # <-- use the service name here, should override issues with host for python
     volumes:
       # Mount a host folder so you can see the output after the container stops.
-      - ./app/logs:/app/logs
+      - ./app/logs:/PokemonETL/app/logs
     depends_on:
       poke-db:
         condition: service_healthy
@@ -53,7 +58,9 @@ services:
   poke-jupyter:
     build:
       context: .                     # reuse the same Dockerfile
-      dockerfile: poke-jupyter.Dockerfile
+      dockerfile: Dockerfile.poke-jupyter
+      args:
+        PROJECT_NAME: ${PROJECT_NAME}
     container_name: poke_jupyter
     tty: true
     stdin_open: true
@@ -66,9 +73,10 @@ services:
 #        tail -f /dev/null
 #      "
     environment:
+      PROJECT_DIR_PATH: ${PROJECT_DIR_PATH_DOCKER}
       LOG_LEVEL: DEBUG
       POSTGRES_HOST: poke-db
-      PYTHONPATH: /app
+      PYTHONPATH: PokemonETL/app
       # optional – set a password instead of a token
       # JUPYTER_PASSWORD: your_secret
     ports:
@@ -79,5 +87,7 @@ services:
     depends_on:
       poke-db:
         condition: service_healthy
+      poke-etl:
+        condition: service_completed_successfully
     restart: unless-stopped        # keep it alive across r
 

@@ -1,19 +1,25 @@
-# 1️⃣ From the project root (where Dockerfile & docker-compose.yml live)
+# From the project root (where Dockerfile & docker-compose.yml live)
 cd PokemonETL
 
-# 2️⃣ Build the image (only needed the first time or after code changes)
-docker compose down && docker compose build --no-cache && docker compose up --force-recreate --remove-orphans --abort-on-container-exit
-
-
-# 3️⃣ Run the container – it will execute the script and then exit
-docker compose up --abort-on-container-exit
-
-# 4️⃣ Inspect the result
-cat output/generations.json
-
+# -------------------------------------------------------------------------
+# SECTION: LOCAL ISSUES WITH WRITING IN PYCHARM
+# -------------------------------------------------------------------------
 # Make sure the host folder (./logs relative to the compose file) exists and is writable:
 mkdir -p app/logs
 chmod 775 app/logs
+
+# -------------------------------------------------------------------------
+# SECTION: NEED TO RESTART DOCKER
+# -------------------------------------------------------------------------
+# Build the image (only needed the first time or after code changes)
+docker compose down && docker compose build --no-cache && docker compose up --force-recreate --remove-orphans --abort-on-container-exit
+
+
+# -------------------------------------------------------------------------
+# SECTION: DELETE AND START OVER IN DOCKER
+# -------------------------------------------------------------------------
+# get project names
+docker compose ls
 
 
 PROJECT=pokemonetl

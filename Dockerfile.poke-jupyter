@@ -1,7 +1,14 @@
+
+
 # -------------------------------------------------------------
 # 1️⃣ Choose a base image that already contains Python.
 # -------------------------------------------------------------
 FROM python:3.12-slim-bookworm
+RUN echo "1PROJECT_NAME = '${PROJECT_NAME}'"
+# tells Docker to accept the build‑arg
+ARG PROJECT_NAME=PokemonETL # Fallback
+ENV PROJECT_NAME=${PROJECT_NAME}
+RUN echo "2PROJECT_NAME = '${PROJECT_NAME}'"
 
 # -------------------------------------------------------------
 # 2️⃣ Install OS‑level packages that some wheels need.
@@ -19,18 +26,22 @@ ARG GID=1000
 RUN groupadd -g ${GID} ${USERNAME} && \
     useradd -m -u ${UID} -g ${GID} -s /bin/bash ${USERNAME}
 
+
 # -------------------------------------------------------------
 # 4️⃣ Copy the source tree into /app and install deps
 # -------------------------------------------------------------
-WORKDIR /app
+WORKDIR /PokemonETL
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-RUN mkdir -p /app/logs && chown -R 1000:1000 /app/logs
+RUN mkdir -p /PokemonETL/app/logs && chown -R 1000:1000 /PokemonETL/app/logs
 
 # Copy the actual Python package (the `app/` folder)
-COPY app/ /app
-COPY .env /app
-COPY logging_config.yaml /app
+COPY app/ /PokemonETL/app/
+COPY .env /PokemonETL
+COPY logging_config.yaml /PokemonETL
+
+RUN echo "Fixing permissions on /PokemonETL..." && \
+    chown -R "${UID}:${GID}" /PokemonETL
 
 # -------------------------------------------------------------
 # 5️⃣ Switch to the non‑root user
@@ -43,4 +54,4 @@ ENV PYTHONUNBUFFERED=1
 # -------------------------------------------------------------
 # 6️⃣ Default command – can be overridden in compose if you like
 # -----------------------------------------------
-CMD ["python", "-m", "scripts.async_main"]
+CMD ["jupyter", "lab", "--ip=0.0.0.0", "--no-browser", "--allow-root", "--NotebookApp.token=''"]
